@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktywna Powtórka Matematyczna - Klasa 5</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background-color: #020617;
+            color: #f8fafc;
+        }
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #1d4ed8;
+        }
+        /* Portal animation */
+        @keyframes portal-glow {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(34, 211, 238, 0.4)); }
+            50% { transform: scale(1.08); filter: drop-shadow(0 0 15px rgba(34, 211, 238, 0.8)); }
+        }
+        .portal-animation {
+            animation: portal-glow 2s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="overflow-x-hidden pb-12">
+
+    <!-- NAGŁÓWEK I STATYSTYKI PREZENTACJI -->
+    <header class="sticky top-0 z-50 bg-slate-950/95 border-b border-blue-900/50 backdrop-blur-md px-4 py-3">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center text-white font-orbitron font-bold text-xl shadow-[0_0_15px_rgba(59,130,246,0.5)]">
+                    M5
+                </div>
+                <div>
+                    <h1 class="text-xl font-orbitron font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-amber-400">
+                        INTERAKTYWNY PORTAL MATEMATYCZNY
+                    </h1>
+                    <p class="text-xs text-slate-400 font-semibold tracking-widest uppercase">Przejrzysta Powtórka dla Klasy 5</p>
+                </div>
+            </div>
+
+            <!-- Panel sterowania prezentera -->
+            <div class="flex items-center gap-3 text-sm">
+                <button onclick="toggleDevPanel()" class="bg-slate-900 hover:bg-slate-800 border border-amber-500/30 text-amber-500 px-3 py-1 rounded text-xs transition-colors font-orbitron">
+                    <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Panel Prezentera
+                </button>
+                <div class="bg-slate-900 border border-blue-800/60 px-3 py-1.5 rounded-md flex items-center gap-2">
+                    <i class="fa-solid fa-user text-blue-400"></i>
+                    <span id="player-display-name" class="font-orbitron font-bold text-slate-300">Uczeń-01</span>
+                </div>
+                <div class="bg-slate-900 border border-blue-800/60 px-3 py-1.5 rounded-md flex items-center gap-2">
+                    <i class="fa-solid fa-star text-amber-400"></i>
+                    <span id="player-score" class="font-orbitron font-bold text-white">0 XP</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Globalny pasek postępu lekcji -->
+        <div class="w-full bg-slate-900 h-2 mt-3 rounded-full overflow-hidden border border-slate-800">
+            <div id="global-progress-bar" class="bg-gradient-to-r from-blue-500 via-cyan-500 to-amber-500 h-full w-[5%] transition-all duration-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
+        </div>
+    </header>
+
+    <!-- UKRYTY PANEL PREZENTERA (Ułatwia pokazanie ukończonej gry bez żmudnego klikania przed klasą) -->
+    <div id="dev-panel" class="hidden bg-amber-950/90 border-b border-amber-500/50 p-3 text-center text-xs space-x-2 transition-all">
+        <span class="text-amber-400 font-bold uppercase tracking-wider mr-2"><i class="fa-solid fa-hammer"></i> Narzędzia Prezentacyjne:</span>
+        <button onclick="devCompleteMaze()" class="bg-slate-900 hover:bg-slate-800 border border-amber-500 px-3 py-1 rounded text-white font-bold transition-colors">
+            Zaliczyj Labirynt (M1)
+        </button>
+        <button onclick="devCompleteDecimals()" class="bg-slate-900 hover:bg-slate-800 border border-amber-500 px-3 py-1 rounded text-white font-bold transition-colors">
+            Zaliczyj Ułamki Dziesiętne (M2)
+        </button>
+        <button onclick="devCompleteQuiz()" class="bg-slate-900 hover:bg-slate-800 border border-amber-500 px-3 py-1 rounded text-white font-bold transition-colors">
+            Zaliczyj Quiz (M3)
+        </button>
+        <button onclick="devDefeatBoss()" class="bg-slate-900 hover:bg-slate-800 border border-amber-500 px-3 py-1 rounded text-white font-bold transition-colors">
+            Pokonaj Bossa (M4)
+        </button>
+    </div>
+
+    <!-- WSTĘP -->
+    <section id="intro-section" class="max-w-4xl mx-auto px-4 py-8 text-center">
+        <div class="bg-gradient-to-b from-slate-900 to-slate-950 border border-blue-900/80 rounded-2xl p-6 sm:p-10 shadow-[0_0_40px_rgba(30,58,138,0.3)]">
+            <div class="inline-block px-4 py-1.5 bg-blue-950/80 border border-blue-700/50 rounded-full text-blue-400 text-xs font-semibold uppercase tracking-widest mb-6 font-orbitron">
+                MULTIMEDIALNA PREZENTACJA LEKCYJNA
+            </div>
+            <h2 class="text-3xl sm:text-5xl font-orbitron font-black text-white mb-6 uppercase tracking-tight leading-tight">
+                Matematyka Klasa 5: <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-400 to-amber-400">Powtórzenie Wiadomości</span>
+            </h2>
+            <p class="text-slate-300 text-lg mb-8 max-w-2xl mx-auto">
+                W pełni interaktywny projekt stworzony do zaprezentowania na lekcji matematyki. Wszystkie teksty i działania są czyste, przejrzyste i łatwe do odczytania.
+            </p>
+
+            <div class="bg-slate-950 border border-blue-900/60 p-6 rounded-xl max-w-md mx-auto mb-8 text-left">
+                <label class="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-2 font-orbitron">Nazwa Profilu (Dowolna):</label>
+                <div class="flex gap-2">
+                    <input type="text" id="player-name-input" placeholder="Wpisz np. Klasa V..." class="w-full bg-slate-900 border border-blue-800/80 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-cyan-400 font-orbitron text-lg">
+                    <button onclick="savePlayerName()" class="bg-blue-600 hover:bg-blue-500 transition-colors px-6 py-2 rounded-lg font-orbitron font-bold text-white uppercase tracking-wider text-sm whitespace-nowrap shadow-[0_0_15px_rgba(59,130,246,0.4)]">
+                        Ustaw
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left font-sans">
+                <div class="bg-slate-900/50 border border-slate-800 p-4 rounded-xl">
+                    <div class="text-amber-400 text-2xl mb-2"><i class="fa-solid fa-calculator"></i></div>
+                    <h3 class="font-orbitron font-bold text-white text-base">Ułamki Dziesiętne</h3>
+                    <p class="text-slate-400 text-xs mt-1">Kompletny zestaw: dodawanie, odejmowanie, mnożenie, dzielenie i szeregowanie.</p>
+                </div>
+                <div class="bg-slate-900/50 border border-slate-800 p-4 rounded-xl">
+                    <div class="text-blue-400 text-2xl mb-2"><i class="fa-solid fa-draw-polygon"></i></div>
+                    <h3 class="font-orbitron font-bold text-white text-base">Pola Powierzchni</h3>
+                    <p class="text-slate-400 text-xs mt-1">Obliczanie pól figur płaskich (prostokąt, równoległobok, trójkąt) z rysunkami.</p>
+                </div>
+                <div class="bg-slate-900/50 border border-slate-800 p-4 rounded-xl">
+                    <div class="text-cyan-400 text-2xl mb-2"><i class="fa-solid fa-desktop"></i></div>
+                    <h3 class="font-orbitron font-bold text-white text-base">Czytelność</h3>
+                    <p class="text-slate-400 text-xs mt-1">Brak skomplikowanych znaczków i wzorów – wyłącznie czyste i jasne napisy.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PANEL GŁÓWNY Z MODUŁAMI -->
+    <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- LEWE MENU NAWIGACYJNE -->
+        <div class="lg:col-span-3 space-y-6">
+            <div class="bg-slate-900 border border-blue-900/50 rounded-xl p-5 font-sans">
+                <h3 class="font-orbitron font-bold text-white uppercase tracking-wider text-sm border-b border-slate-800 pb-3 mb-4">
+                    Etapy Powtórki
+                </h3>
+                <nav class="space-y-2">
+                    <button onclick="scrollToSection('mission-1')" id="nav-m1" class="w-full text-left bg-blue-950/40 border border-blue-900/50 px-3 py-2.5 rounded-lg flex items-center justify-between transition-all hover:bg-blue-900/30">
+                        <span class="flex items-center gap-3 text-sm">
+                            <span class="w-6 h-6 rounded bg-blue-800 text-white flex items-center justify-center font-bold text-xs">1</span>
+                            Ułamki Zwykłe (Labirynt)
+                        </span>
+                        <i class="fa-solid fa-circle-play text-blue-400"></i>
+                    </button>
+
+                    <button onclick="scrollToSection('mission-2')" id="nav-m2" class="w-full text-left bg-slate-950 border border-slate-800 px-3 py-2.5 rounded-lg flex items-center justify-between transition-all hover:bg-slate-900/50">
+                        <span class="flex items-center gap-3 text-sm">
+                            <span class="w-6 h-6 rounded bg-slate-800 text-slate-400 flex items-center justify-center font-bold text-xs">2</span>
+                            Ułamki Dziesiętne (4 Działania)
+                        </span>
+                        <i class="fa-solid fa-lock text-slate-600" id="lock-m2"></i>
+                    </button>
+
+                    <button onclick="scrollToSection('mission-3')" id="nav-m3" class="w-full text-left bg-slate-950 border border-slate-800 px-3 py-2.5 rounded-lg flex items-center justify-between transition-all hover:bg-slate-900/50">
+                        <span class="flex items-center gap-3 text-sm">
+                            <span class="w-6 h-6 rounded bg-slate-800 text-slate-400 flex items-center justify-center font-bold text-xs">3</span>
+                            Wielki Quiz Klasy 5
+                        </span>
+                        <i class="fa-solid fa-lock text-slate-600" id="lock-m3"></i>
+                    </button>
+
+                    <button onclick="scrollToSection('jokes-hub')" id="nav-jokes" class="w-full text-left bg-slate-950 border border-slate-800 px-3 py-2.5 rounded-lg flex items-center justify-between transition-all hover:bg-slate-900/50">
+                        <span class="flex items-center gap-3 text-sm">
+                            <span class="w-6 h-6 rounded bg-slate-800 text-slate-400 flex items-center justify-center font-bold text-xs"><i class="fa-solid fa-face-laugh"></i></span>
+                            Matematyczny Humor
+                        </span>
+                        <i class="fa-solid fa-circle-check text-blue-500"></i>
+                    </button>
+
+                    <button onclick="scrollToSection('mission-4')" id="nav-m4" class="w-full text-left bg-slate-950 border border-slate-800 px-3 py-2.5 rounded-lg flex items-center justify-between transition-all hover:bg-slate-900/50">
+                        <span class="flex items-center gap-3 text-sm">
+                            <span class="w-6 h-6 rounded bg-slate-800 text-slate-400 flex items-center justify-center font-bold text-xs">4</span>
+                            Pojedynek: Pola Figur
+                        </span>
+                        <i class="fa-solid fa-lock text-slate-600" id="lock-m4"></i>
+                    </button>
+
+                    <button onclick="scrollToSection('certificate-section')" id="nav-cert" class="w-full text-left bg-slate-950 border border-slate-800 px-3 py-2.5 rounded-lg flex items-center justify-between transition-all hover:bg-slate-900/50">
+                        <span class="flex items-center gap-3 text-sm text-amber-500 font-semibold">
+                            <span class="w-6 h-6 rounded bg-amber-950/60 border border-amber-800 text-amber-400 flex items-center justify-center font-bold text-xs"><i class="fa-solid fa-trophy"></i></span>
+                            Certyfikat Ukończenia
+                        </span>
+                        <i class="fa-solid fa-lock text-slate-600" id="lock-cert"></i>
+                    </button>
+                </nav>
+            </div>
+
+            <!-- CIEKAWOSTKA LEKCYJNA -->
+            <div class="bg-gradient-to-br from-slate-900 to-indigo-950 border border-blue-900/40 rounded-xl p-5 font-sans">
+                <span class="text-[10px] uppercase font-bold text-amber-400 tracking-wider font-orbitron"><i class="fa-solid fa-lightbulb mr-1"></i> Ciekawy zapis matematyczny</span>
+                <h4 class="text-white font-bold mt-1 text-base">Znak dzielenia i mnożenia</h4>
+                <p class="text-slate-300 text-xs mt-2 leading-relaxed">
+                    W dawnych czasach zamiast kropki do mnożenia używano litery X. Z kolei dwukropek do dzielenia (:) spopularyzował wielki matematyk Leibniz w 1684 roku, aby uprościć zapis w druku książkowym. Dzisiaj używamy tych prostych znaków na co dzień w zeszytach!
+                </p>
+            </div>
+
+            <!-- STOPER LEKCYJNY -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 text-center">
+                <span class="text-xs text-slate-400 uppercase tracking-widest font-bold">Czas trwania lekcji</span>
+                <div id="lesson-timer" class="text-3xl font-orbitron font-black text-cyan-400 mt-1">45:00</div>
+                <button onclick="resetTimer()" class="mt-3 text-xs bg-slate-950 hover:bg-slate-800 border border-slate-800 px-3 py-1 rounded text-slate-300 transition-colors font-sans">
+                    <i class="fa-solid fa-rotate-left mr-1"></i> Resetuj stoper
+                </button>
+            </div>
+        </div>
+
+        <!-- PRAWA STRONA - SZCZEGÓŁOWA ZAWARTOŚĆ -->
+        <div class="lg:col-span-9 space-y-12">
+            
+            <!-- MISJA 1: LABIRYNT UŁAMKÓW ZWYKŁYCH -->
+            <section id="mission-1" class="bg-slate-900 border border-blue-900/50 rounded-2xl p-6 shadow-lg">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-blue-900/40 pb-4 mb-6">
+                    <div>
+                        <span class="text-xs text-amber-400 font-orbitron uppercase tracking-wider font-bold">Misja 1: Ułamki Zwykłe</span>
+                        <h2 class="text-2xl sm:text-3xl font-orbitron font-bold text-white mt-1">
+                            Ułamkowy Labirynt <i class="fa-solid fa-route text-blue-400 ml-1"></i>
+                        </h2>
+                    </div>
+                    <div class="bg-blue-950 border border-blue-800/80 px-3 py-1.5 rounded-lg text-sm text-blue-300 font-semibold flex items-center gap-2">
+                        Wartość: <span class="text-amber-400 font-orbitron font-bold">150 XP</span>
+                    </div>
+                </div>
+
+                <p class="text-slate-300 text-sm mb-6 font-sans">
+                    Doprowadź <strong>Rakietę (▲)</strong> do <strong>Portalu Wyjściowego (★)</strong>. Bramy oznaczone ikoną <i class="fa-solid fa-lock text-amber-500"></i> wymagają rozwiązania zadań na sprowadzanie do wspólnego mianownika.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                    
+                    <!-- Labirynt Grid -->
+                    <div class="md:col-span-8 flex flex-col items-center">
+                        <div class="relative bg-slate-950 p-4 border border-blue-900/60 rounded-xl w-full max-w-sm sm:max-w-md shadow-inner">
+                            <div class="flex justify-between text-[11px] mb-3 text-slate-400 border-b border-slate-800 pb-2 font-sans">
+                                <span class="flex items-center gap-1"><span class="inline-block w-3 h-3 bg-blue-600 rounded-sm"></span> Twoja Rakieta</span>
+                                <span class="flex items-center gap-1"><span class="inline-block w-3 h-3 bg-amber-500 rounded-sm"></span> Blokada</span>
+                                <span class="flex items-center gap-1"><span class="inline-block w-3 h-3 bg-cyan-400 rounded-sm"></span> Portal Końcowy</span>
+                            </div>
+
+                            <div id="maze-container" class="grid grid-cols-7 gap-1 aspect-square w-full"></div>
+
+                            <!-- Nakładka na zadanie w labiryncie -->
+                            <div id="maze-overlay" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center rounded-xl hidden">
+                                <h3 id="maze-overlay-title" class="text-2xl font-orbitron font-bold text-white mb-2">Brama Zablokowana!</h3>
+                                <p id="maze-overlay-desc" class="text-slate-300 text-sm mb-4 font-sans">Zaznacz właściwy wynik, aby otworzyć drogę:</p>
+                                
+                                <div class="bg-slate-900 border border-blue-800/80 p-4 rounded-lg w-full mb-4">
+                                    <p id="maze-question" class="text-xl font-bold text-amber-400 mb-3 font-sans"></p>
+                                    <div id="maze-options" class="grid grid-cols-2 gap-2 font-sans"></div>
+                                </div>
+                                <p id="maze-feedback" class="text-sm font-semibold text-cyan-400 hidden font-sans"></p>
+                            </div>
+                        </div>
+
+                        <!-- Przyciski kierunkowe pod ekran dotykowy -->
+                        <div class="mt-4 grid grid-cols-3 gap-2 w-full max-w-[200px]">
+                            <div></div>
+                            <button onclick="movePlayer('up')" class="bg-blue-950 hover:bg-blue-900 border border-blue-800 p-3 rounded-lg text-white font-bold text-lg"><i class="fa-solid fa-chevron-up"></i></button>
+                            <div></div>
+                            <button onclick="movePlayer('left')" class="bg-blue-950 hover:bg-blue-900 border border-blue-800 p-3 rounded-lg text-white font-bold text-lg"><i class="fa-solid fa-chevron-left"></i></button>
+                            <button onclick="movePlayer('down')" class="bg-blue-950 hover:bg-blue-900 border border-blue-800 p-3 rounded-lg text-white font-bold text-lg"><i class="fa-solid fa-chevron-down"></i></button>
+                            <button onclick="movePlayer('right')" class="bg-blue-950 hover:bg-blue-900 border border-blue-800 p-3 rounded-lg text-white font-bold text-lg"><i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Prawy panel stanu -->
+                    <div class="md:col-span-4 flex flex-col justify-between space-y-4 font-sans">
+                        <div class="bg-slate-950 border border-slate-800 p-4 rounded-xl space-y-3">
+                            <h4 class="font-orbitron font-bold text-white text-sm">Instrukcja Sterowania:</h4>
+                            <ul class="text-xs text-slate-300 space-y-2 list-disc pl-4">
+                                <li>Poruszaj się za pomocą <strong class="text-blue-400">klawiszy strzałek</strong> na klawiaturze lub <strong class="text-blue-400">przycisków na ekranie</strong>.</li>
+                                <li>Otwórz wszystkie 3 bramy, aby bezpiecznie opuścić labirynt.</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-blue-950/30 border border-blue-900/40 p-4 rounded-xl text-center">
+                            <span class="text-xs text-slate-400 uppercase tracking-widest font-bold">Otworzone bramy</span>
+                            <div class="text-2xl font-orbitron font-black text-amber-400 mt-1" id="maze-keys">0 / 3</div>
+                        </div>
+
+                        <button onclick="resetMaze()" class="w-full bg-slate-950 border border-slate-800 hover:bg-slate-900 px-4 py-2 rounded-lg text-sm text-slate-300 transition-colors">
+                            <i class="fa-solid fa-arrows-rotate mr-2"></i> Resetuj labirynt
+                        </button>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- MISJA 2: LABORATORIUM UŁAMKÓW DZIESIĘTNYCH (4 DZIAŁANIA + SORTOWANIE) -->
+            <section id="mission-2" class="bg-slate-900 border border-blue-900/50 rounded-2xl p-6 shadow-lg opacity-50 pointer-events-none transition-all duration-500">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-blue-900/40 pb-4 mb-6">
+                    <div>
+                        <span class="text-xs text-amber-400 font-orbitron uppercase tracking-wider font-bold">Misja 2: Ułamki Dziesiętne</span>
+                        <h2 class="text-2xl sm:text-3xl font-orbitron font-bold text-white mt-1">
+                            Laboratorium Ułamków Dziesiętnych <i class="fa-solid fa-vial text-cyan-400 ml-1"></i>
+                        </h2>
+                    </div>
+                    <div class="bg-blue-950 border border-blue-800/80 px-3 py-1.5 rounded-lg text-sm text-blue-300 font-semibold flex items-center gap-2">
+                        Wartość: <span class="text-amber-400 font-orbitron font-bold">150 XP</span>
+                    </div>
+                </div>
+
+                <!-- Sub-Nawigacja Stacji -->
+                <div class="flex flex-wrap border-b border-slate-800 mb-6 text-sm font-orbitron gap-1">
+                    <button id="tab-add" onclick="switchDecimalTab('add')" class="px-4 py-2 text-cyan-400 border-b-2 border-cyan-400 font-bold transition-all">
+                        Dodawanie
+                    </button>
+                    <button id="tab-sub" onclick="switchDecimalTab('sub')" class="px-4 py-2 text-slate-400 hover:text-white transition-all">
+                        Odejmowanie
+                    </button>
+                    <button id="tab-mul" onclick="switchDecimalTab('mul')" class="px-4 py-2 text-slate-400 hover:text-white transition-all">
+                        Mnożenie
+                    </button>
+                    <button id="tab-div" onclick="switchDecimalTab('div')" class="px-4 py-2 text-slate-400 hover:text-white transition-all">
+                        Dzielenie
+                    </button>
+                    <button id="tab-sort" onclick="switchDecimalTab('sort')" class="px-4 py-2 text-slate-400 hover:text-white transition-all">
+                        Porządkowanie
+                    </button>
+                </div>
+
+                <!-- STACJA A: DODAWANIE -->
+                <div id="decimal-section-add" class="space-y-4 font-sans">
+                    <p class="text-slate-300 text-sm">
+                        Rozwiąż poprawnie przykłady na dodawanie ułamków dziesiętnych. Pamiętaj, aby dodawać całości do całości, a części dziesiętne do części dziesiętnych.
+                    </p>
+                    <div class="bg-slate-950 border border-slate-800 p-6 rounded-xl max-w-lg mx-auto space-y-6">
+                        <div class="text-center">
+                            <span class="text-xs text-slate-400 uppercase font-orbitron tracking-wider">Oblicz sumę:</span>
+                            <div id="decimal-add-eq" class="text-2xl sm:text-3xl font-orbitron font-black text-amber-400 mt-2"></div>
+                        </div>
+                        <div id="decimal-add-options" class="grid grid-cols-2 gap-3"></div>
+                        <div class="flex justify-between items-center text-xs text-slate-400 border-t border-slate-900 pt-4">
+                            <span id="decimal-add-progress">Przykład: 1 z 3</span>
+                            <span class="font-bold text-cyan-400">Wykonaj poprawnie 3 zadania</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STACJA B: ODEJMOWANIE -->
+                <div id="decimal-section-sub" class="space-y-4 hidden font-sans">
+                    <p class="text-slate-300 text-sm">
+                        Rozwiąż poprawnie przykłady na odejmowanie ułamków dziesiętnych. Pamiętaj o wyrównaniu miejsc po przecinku (np. dopisując zero).
+                    </p>
+                    <div class="bg-slate-950 border border-slate-800 p-6 rounded-xl max-w-lg mx-auto space-y-6">
+                        <div class="text-center">
+                            <span class="text-xs text-slate-400 uppercase font-orbitron tracking-wider">Oblicz różnicę:</span>
+                            <div id="decimal-sub-eq" class="text-2xl sm:text-3xl font-orbitron font-black text-amber-400 mt-2"></div>
+                        </div>
+                        <div id="decimal-sub-options" class="grid grid-cols-2 gap-3"></div>
+                        <div class="flex justify-between items-center text-xs text-slate-400 border-t border-slate-900 pt-4">
+                            <span id="decimal-sub-progress">Przykład: 1 z 3</span>
+                            <span class="font-bold text-cyan-400">Wykonaj poprawnie 3 zadania</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STACJA C: MNOŻENIE -->
+                <div id="decimal-section-mul" class="space-y-4 hidden font-sans">
+                    <p class="text-slate-300 text-sm">
+                        Pomnóż ułamki dziesiętne. Wynik musi mieć tyle samo miejsc po przecinku, ile mają oba ułamki łącznie (np. 0,2 · 0,4 = 0,08).
+                    </p>
+                    <div class="bg-slate-950 border border-slate-800 p-6 rounded-xl max-w-lg mx-auto space-y-6">
+                        <div class="text-center">
+                            <span class="text-xs text-slate-400 uppercase font-orbitron tracking-wider">Oblicz iloczyn:</span>
+                            <div id="decimal-mul-eq" class="text-2xl sm:text-3xl font-orbitron font-black text-amber-400 mt-2"></div>
+                        </div>
+                        <div id="decimal-mul-options" class="grid grid-cols-2 gap-3"></div>
+                        <div class="flex justify-between items-center text-xs text-slate-400 border-t border-slate-900 pt-4">
+                            <span id="decimal-mul-progress">Przykład: 1 z 3</span>
+                            <span class="font-bold text-cyan-400">Wykonaj poprawnie 3 zadania</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STACJA D: DZIELENIE -->
+                <div id="decimal-section-div" class="space-y-4 hidden font-sans">
+                    <p class="text-slate-300 text-sm">
+                        Podziel ułamki dziesiętne przez liczbę naturalną. Wyobraź sobie dzielenie zwykłych liczb, a potem dopasuj pozycję przecinka w wyniku.
+                    </p>
+                    <div class="bg-slate-950 border border-slate-800 p-6 rounded-xl max-w-lg mx-auto space-y-6">
+                        <div class="text-center">
+                            <span class="text-xs text-slate-400 uppercase font-orbitron tracking-wider">Oblicz iloraz:</span>
+                            <div id="decimal-div-eq" class="text-2xl sm:text-3xl font-orbitron font-black text-amber-400 mt-2"></div>
+                        </div>
+                        <div id="decimal-div-options" class="grid grid-cols-2 gap-3"></div>
+                        <div class="flex justify-between items-center text-xs text-slate-400 border-t border-slate-900 pt-4">
+                            <span id="decimal-div-progress">Przykład: 1 z 3</span>
+                            <span class="font-bold text-cyan-400">Wykonaj poprawnie 3 zadania</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STACJA E: PORZĄDKOWANIE -->
+                <div id="decimal-section-sort" class="space-y-4 hidden font-sans">
+                    <p class="text-slate-300 text-sm">
+                        Wskaż i ułóż liczby rosnąco – <strong>od NAJMNIEJSZEGO do NAJWIĘKSZEGO</strong> ułamka dziesiętnego.
+                    </p>
+                    <div class="bg-slate-950 p-6 border border-slate-800 rounded-xl">
+                        <div id="decimal-buttons-container" class="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6 font-orbitron"></div>
+                        <div class="bg-slate-900 border border-slate-800 p-4 rounded-lg">
+                            <span class="text-xs text-slate-400 uppercase block mb-2 font-orbitron">Utworzony ciąg liczb:</span>
+                            <div id="decimal-sequence-display" class="flex flex-wrap gap-2 min-h-[40px] items-center">
+                                <span class="text-slate-500 italic text-sm">Wybierz odpowiednie liczby z powyższej siatki...</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center mt-6">
+                            <button onclick="resetDecimals()" class="bg-slate-900 border border-slate-800 hover:bg-slate-800 px-4 py-2 rounded-lg text-xs text-slate-300 transition-colors">
+                                <i class="fa-solid fa-arrows-rotate mr-2"></i> Zacznij od nowa
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stopka stanu całego laboratorium -->
+                <div id="station-summary-box" class="mt-6 p-4 bg-slate-950 border border-slate-800 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-4 font-sans">
+                    <div class="text-center sm:text-left">
+                        <h4 class="font-orbitron font-bold text-white text-sm">Postępy w Laboratorium:</h4>
+                        <div class="flex flex-wrap gap-4 text-xs text-slate-400 mt-1">
+                            <span>Dodawanie: <strong id="status-chk-add" class="text-red-500">Oczekiwanie</strong></span>
+                            <span>Odejmowanie: <strong id="status-chk-sub" class="text-red-500">Oczekiwanie</strong></span>
+                            <span>Mnożenie: <strong id="status-chk-mul" class="text-red-500">Oczekiwanie</strong></span>
+                            <span>Dzielenie: <strong id="status-chk-div" class="text-red-500">Oczekiwanie</strong></span>
+                            <span>Porządkowanie: <strong id="status-chk-sort" class="text-red-500">Oczekiwanie</strong></span>
+                        </div>
+                    </div>
+                    <div id="decimal-overall-success" class="hidden text-cyan-400 font-orbitron font-bold text-sm">
+                        <i class="fa-solid fa-circle-check mr-2"></i> Wszystkie stacje ukończone pomyślnie!
+                    </div>
+                </div>
+            </section>
+
+            <!-- MISJA 3: WIELKI QUIZ KLASOWY -->
+            <section id="mission-3" class="bg-slate-900 border border-blue-900/50 rounded-2xl p-6 shadow-lg opacity-50 pointer-events-none transition-all duration-500">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-blue-900/40 pb-4 mb-6">
+                    <div>
+                        <span class="text-xs text-amber-400 font-orbitron uppercase tracking-wider font-bold">Misja 3: Wielki Quiz</span>
+                        <h2 class="text-2xl sm:text-3xl font-orbitron font-bold text-white mt-1">
+                            Wielki Quiz Klasy 5 <i class="fa-solid fa-square-poll-vertical text-blue-400 ml-1"></i>
+                        </h2>
+                    </div>
+                    <div class="bg-blue-950 border border-blue-800/80 px-3 py-1.5 rounded-lg text-sm text-blue-300 font-semibold flex items-center gap-2">
+                        Wartość: <span class="text-amber-400 font-orbitron font-bold">200 XP</span>
+                    </div>
+                </div>
+
+                <div class="bg-slate-950 border border-blue-900/60 p-6 rounded-xl relative font-sans">
+                    <div class="flex justify-between items-center text-xs text-slate-400 mb-4 font-orbitron">
+                        <span id="quiz-question-counter">Pytanie: 1 z 5</span>
+                        <span id="quiz-streak-display">Seria poprawnych odpowiedzi: 0 🔥</span>
+                    </div>
+
+                    <div class="mb-6">
+                        <span id="quiz-category" class="bg-blue-950 text-blue-400 border border-blue-800 text-[10px] uppercase font-bold tracking-widest px-2.5 py-1 rounded-full font-orbitron">Podstawy</span>
+                        <p id="quiz-question-text" class="text-lg sm:text-xl font-bold text-white mt-3 leading-snug"></p>
+                    </div>
+
+                    <div id="quiz-options-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6"></div>
+
+                    <!-- Panel z jasnym objaśnieniem wyniku -->
+                    <div id="quiz-explanation-box" class="p-4 bg-slate-900 border border-blue-900/40 rounded-lg hidden">
+                        <p id="quiz-explanation-text" class="text-sm text-slate-300 leading-relaxed"></p>
+                    </div>
+
+                    <div class="flex justify-between items-center mt-6">
+                        <button onclick="skipQuizQuestion()" class="text-xs text-slate-500 hover:text-slate-300 transition-colors">
+                            Pomiń pytanie
+                        </button>
+                        <button id="quiz-next-btn" onclick="nextQuizQuestion()" class="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:pointer-events-none transition-colors font-orbitron font-bold text-white px-6 py-2.5 rounded-lg text-sm uppercase tracking-wider" disabled>
+                            Następne Pytanie <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- KĄCIK SUCHARY -->
+            <section id="jokes-hub" class="bg-gradient-to-r from-slate-950 to-slate-900 border border-blue-900/30 rounded-2xl p-6 font-sans">
+                <div class="flex items-center gap-3 border-b border-slate-800 pb-3 mb-4">
+                    <span class="text-2xl"><i class="fa-solid fa-face-laugh-beam text-amber-400"></i></span>
+                    <div>
+                        <h3 class="text-lg font-orbitron font-bold text-white">Przerwa na Śmiech: Szkolne Suchary</h3>
+                        <p class="text-xs text-slate-400">Kliknij na wybraną kartę, aby odsłonić humorystyczną odpowiedź!</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-slate-900 border border-slate-800 hover:border-blue-900/60 transition-all rounded-xl p-4 cursor-pointer" onclick="toggleJoke(1)">
+                        <p class="text-sm font-semibold text-white">Dlaczego książka od matematyki jest ciągle smutna?</p>
+                        <div id="joke-ans-1" class="hidden mt-2 text-sm text-amber-400 font-bold border-t border-slate-800/80 pt-2">
+                            Ponieważ ma strasznie dużo trudnych problemów! 😂
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 border border-slate-800 hover:border-blue-900/60 transition-all rounded-xl p-4 cursor-pointer" onclick="toggleJoke(2)">
+                        <p class="text-sm font-semibold text-white">Co mówi jeden trójkąt prostokątny do drugiego?</p>
+                        <div id="joke-ans-2" class="hidden mt-2 text-sm text-amber-400 font-bold border-t border-slate-800/80 pt-2">
+                            „Masz po prostu kapitalne kąty!” 📐
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 border border-slate-800 hover:border-blue-900/60 transition-all rounded-xl p-4 cursor-pointer" onclick="toggleJoke(3)">
+                        <p class="text-sm font-semibold text-white">Dlaczego ułamek dziesiętny nie wszedł na seans filmowy?</p>
+                        <div id="joke-ans-3" class="hidden mt-2 text-sm text-amber-400 font-bold border-t border-slate-800/80 pt-2">
+                            Bo zgubił swój przecinek i bileter go nie rozpoznał! 🎬
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 border border-slate-800 hover:border-blue-900/60 transition-all rounded-xl p-4 cursor-pointer" onclick="toggleJoke(4)">
+                        <p class="text-sm font-semibold text-white">Co robi matematyk na piaszczystej plaży?</p>
+                        <div id="joke-ans-4" class="hidden mt-2 text-sm text-amber-400 font-bold border-t border-slate-800/80 pt-2">
+                            Rysuje koła patykiem i liczy na piękną pogodę! 🏖️
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- MISJA 4: POJEDYNEK Z BOSSEM (POLA FIGUR WIZUALNIE I CZYSTO) -->
+            <section id="mission-4" class="bg-slate-900 border border-red-900/40 rounded-2xl p-6 shadow-lg opacity-50 pointer-events-none transition-all duration-500">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-red-900/30 pb-4 mb-6">
+                    <div>
+                        <span class="text-xs text-amber-500 font-orbitron uppercase tracking-wider font-bold"><i class="fa-solid fa-skull mr-1"></i> Finałowe Starcie</span>
+                        <h2 class="text-2xl sm:text-3xl font-orbitron font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-amber-500 mt-1">
+                            Pojedynek: Pola Figur <i class="fa-solid fa-shapes ml-1"></i>
+                        </h2>
+                    </div>
+                    <div class="bg-red-950 border border-red-900 px-3 py-1.5 rounded-lg text-sm text-red-300 font-semibold flex items-center gap-2">
+                        Wartość: <span class="text-amber-400 font-orbitron font-bold">300 XP</span>
+                    </div>
+                </div>
+
+                <p class="text-slate-300 text-sm mb-6 font-sans">
+                    Rozwiąż 3 wyzwania geometryczne. Policz pole powierzchni figury pokazanej na czytelnym schemacie technicznym. Każde prawidłowe obliczenie osłabia punkty pancerza przeciwnika!
+                </p>
+
+                <div class="bg-slate-950 border border-red-900/40 rounded-xl p-6">
+                    
+                    <!-- Życie bossa -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center text-xs text-slate-400 mb-2 font-orbitron">
+                            <span class="text-red-400 font-bold tracking-widest uppercase font-sans">ANOMALIA: GEOMETRYCZNY CHAOS</span>
+                            <span id="boss-hp-text" class="text-white font-bold">PUNKTY ŻYCIA: 100 / 100 HP</span>
+                        </div>
+                        <div class="w-full bg-slate-900 h-4 rounded-full overflow-hidden border border-red-950">
+                            <div id="boss-hp-bar" class="bg-gradient-to-r from-red-600 to-amber-500 h-full w-[100%] transition-all duration-500"></div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        
+                        <!-- Rysunek dynamiczny SVG dla geometrii -->
+                        <div class="bg-slate-900 border border-slate-800 rounded-lg p-4 flex flex-col items-center justify-center relative min-h-[250px]">
+                            <div id="geometry-canvas-wrapper" class="w-full flex justify-center items-center h-48">
+                                <!-- Generowane dynamicznie w czystym, nieskomplikowanym formacie -->
+                            </div>
+                            <div id="boss-bubble" class="absolute top-2 right-2 left-2 bg-slate-950 border border-red-900 text-[11px] text-red-300 p-2 rounded text-center font-semibold font-sans">
+                                "Oblicz pole tej figury!"
+                            </div>
+                        </div>
+
+                        <!-- Panel odpowiedzi -->
+                        <div class="flex flex-col justify-between font-sans">
+                            <div class="bg-slate-900 border border-slate-800 p-4 rounded-lg">
+                                <span class="text-[10px] uppercase font-bold text-slate-400 font-orbitron tracking-widest block mb-2">Zadanie geometryczne:</span>
+                                <p id="boss-quest-text" class="text-sm font-bold text-white mb-4 leading-relaxed"></p>
+                                
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2" id="boss-options"></div>
+                            </div>
+                            <p id="boss-feedback" class="text-xs text-center mt-3 text-red-400 font-semibold"></p>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- CERTYFIKAT MISTRZA -->
+            <section id="certificate-section" class="bg-slate-900 border border-amber-900/50 rounded-2xl p-6 shadow-lg opacity-50 pointer-events-none transition-all duration-500">
+                <div class="text-center border-b border-amber-900/40 pb-4 mb-6">
+                    <span class="text-xs text-amber-400 font-orbitron uppercase tracking-widest font-bold">Ukończenie procesu certyfikacji</span>
+                    <h2 class="text-3xl font-orbitron font-black text-white mt-1">Certyfikat Mistrza Matematyki Klasy 5</h2>
+                </div>
+
+                <!-- Certyfikat wizualny -->
+                <div class="bg-slate-950 border-4 border-double border-amber-500 rounded-xl p-8 max-w-2xl mx-auto shadow-[0_0_50px_rgba(245,158,11,0.25)] relative overflow-hidden">
+                    <div class="absolute -top-12 -right-12 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl"></div>
+                    <div class="absolute -bottom-12 -left-12 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl"></div>
+
+                    <div class="border border-amber-600/30 p-6 rounded text-center relative z-10 font-sans">
+                        <div class="flex justify-center mb-4 text-amber-500">
+                            <i class="fa-solid fa-award text-5xl drop-shadow-[0_0_10px_rgba(245,158,11,0.5)]"></i>
+                        </div>
+                        <h3 class="font-orbitron font-bold text-white text-2xl tracking-wider mb-2">DYPLOM POWTÓRZENIOWY</h3>
+                        <p class="text-xs text-slate-400 uppercase tracking-widest">Dla wyróżniającego się uczestnika zajęć</p>
+                        
+                        <p id="cert-player-name" class="font-orbitron text-2xl sm:text-3xl font-black text-amber-400 my-4 border-b border-slate-800 pb-2 inline-block px-8">
+                            UCZEŃ-01
+                        </p>
+
+                        <p class="text-slate-300 text-sm max-w-md mx-auto leading-relaxed mb-6">
+                            za pomyślne ukończenie modułów powtórzeniowych w panelu dydaktycznym, wykazanie się precyzją w dodawaniu, odejmowaniu, mnożeniu oraz dzieleniu ułamków dziesiętnych, a także bezbłędne opanowanie obliczeń pól powierzchni wielokątów płaskich.
+                        </p>
+
+                        <div class="grid grid-cols-2 gap-4 text-left border-t border-slate-800/80 pt-4 text-xs">
+                            <div>
+                                <span class="text-[10px] text-slate-500 block uppercase font-orbitron">Wygenerowano w dniu:</span>
+                                <span id="cert-date" class="text-slate-300 font-mono"></span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[10px] text-slate-500 block uppercase font-orbitron">Uzyskany Tytuł:</span>
+                                <span class="text-amber-400 font-semibold uppercase tracking-wider font-orbitron">Ekspert Ułamków i Geometrii</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-6">
+                    <button onclick="window.print()" class="bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 transition-all font-orbitron font-bold text-white px-8 py-3 rounded-lg uppercase tracking-widest text-sm shadow-[0_0_20px_rgba(245,158,11,0.4)]">
+                        <i class="fa-solid fa-print mr-2"></i> Wydrukuj Certyfikat
+                    </button>
+                </div>
+            </section>
+
+        </div>
+
+    </main>
+
+    <!-- STOPKA -->
+    <footer class="bg-slate-950 border-t border-blue-900/40 py-8 mt-12 text-center text-slate-500 text-xs">
+        <div class="max-w-7xl mx-auto px-4 space-y-2 font-sans">
+            <p class="font-orbitron text-slate-400 font-semibold tracking-wider">MATEMATYCZNY PANEL DYDAKTYCZNY v6.0</p>
+            <p>Aplikacja lekcyjna do powtórzenia materiału dla szkoły podstawowej.</p>
+            <p>© 2026 Kosmiczne Centrum Nauczania. Wszystkie wzory i obliczenia zweryfikowane.</p>
+        </div>
+    </footer>
+
+    <!-- DŹWIĘKI SYSTEMOWE -->
+    <div class="fixed bottom-4 right-4 z-50">
+        <button id="music-btn" onclick="toggleSfx()" class="w-12 h-12 bg-slate-900 hover:bg-slate-800 border border-blue-900/60 rounded-full flex items-center justify-center text-slate-300 transition-transform hover:scale-110 shadow-lg">
+            <i id="music-icon" class="fa-solid fa-volume-high"></i>
+        </button>
+    </div>
+
+    <!-- SILNIK GRY I OBSŁUGI ZADAN -->
+    <script>
+        // System dźwiękowy Web Audio API (nie zależy od plików zewnętrznych)
+        let sfxEnabled = true;
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playTone(freq, type, duration) {
+            if (!sfxEnabled) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.type = type || 'sine';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {
+                console.log("Audiocontext block");
+            }
+        }
+
+        function toggleSfx() {
+            sfxEnabled = !sfxEnabled;
+            const icon = document.getElementById('music-icon');
+            icon.className = sfxEnabled ? "fa-solid fa-volume-high" : "fa-solid fa-volume-xmark";
+        }
+
+        // Globalne stany zaliczeń
+        let globalScore = 0;
+        let isMazeComplete = false;
+        let isDecimalsComplete = false;
+        let isQuizComplete = false;
+        let isBossComplete = false;
+        let playerName = "Uczeń-01";
+
+        // Zaliczenia poszczególnych stacji ułamków dziesiętnych
+        let decimalAddDone = false;
+        let decimalSubDone = false;
+        let decimalMulDone = false;
+        let decimalDivDone = false;
+        let decimalSortDone = false;
+
+        function toggleDevPanel() {
+            const panel = document.getElementById('dev-panel');
+            panel.classList.toggle('hidden');
+            playTone(800, 'sine', 0.1);
+        }
+
+        function updateProgress() {
+            let percent = 5;
+            if (isMazeComplete) percent += 20;
+            if (isDecimalsComplete) percent += 25;
+            if (isQuizComplete) percent += 25;
+            if (isBossComplete) percent += 25;
+
+            document.getElementById('global-progress-bar').style.width = percent + '%';
+            document.getElementById('player-score').innerText = globalScore + " XP";
+
+            if (isMazeComplete) {
+                const m2 = document.getElementById('mission-2');
+                m2.classList.remove('opacity-50', 'pointer-events-none');
+                document.getElementById('lock-m2').className = "fa-solid fa-circle-play text-blue-400";
+                document.getElementById('nav-m2').classList.add('bg-blue-950/40', 'border-blue-900/50');
+            }
+            if (isDecimalsComplete) {
+                const m3 = document.getElementById('mission-3');
+                m3.classList.remove('opacity-50', 'pointer-events-none');
+                document.getElementById('lock-m3').className = "fa-solid fa-circle-play text-blue-400";
+                document.getElementById('nav-m3').classList.add('bg-blue-950/40', 'border-blue-900/50');
+            }
+            if (isQuizComplete) {
+                const m4 = document.getElementById('mission-4');
+                m4.classList.remove('opacity-50', 'pointer-events-none');
+                document.getElementById('lock-m4').className = "fa-solid fa-circle-play text-red-500";
+                document.getElementById('nav-m4').classList.add('bg-red-950/20', 'border-red-900/40');
+            }
+            if (isBossComplete) {
+                const cert = document.getElementById('certificate-section');
+                cert.classList.remove('opacity-50', 'pointer-events-none');
+                document.getElementById('lock-cert').className = "fa-solid fa-trophy text-amber-400";
+                document.getElementById('nav-cert').classList.add('bg-amber-950/20', 'border-amber-800/40');
+            }
+        }
+
+        function scrollToSection(id) {
+            const el = document.getElementById(id);
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Stoper lekcji
+        let totalSeconds = 45 * 60;
+        const timerDisplay = document.getElementById('lesson-timer');
+        function updateTimer() {
+            if (totalSeconds <= 0) {
+                timerDisplay.innerText = "Czas minął!";
+                return;
+            }
+            totalSeconds--;
+            let mins = Math.floor(totalSeconds / 60);
+            let secs = totalSeconds % 60;
+            timerDisplay.innerText = `${mins < 10 ? '0' + mins : mins}:${secs < 10 ? '0' + secs : secs}`;
+        }
+        setInterval(updateTimer, 1000);
+
+        function resetTimer() {
+            totalSeconds = 45 * 60;
+            playTone(400, 'square', 0.2);
+        }
+
+        function savePlayerName() {
+            const input = document.getElementById('player-name-input').value.trim();
+            playerName = input ? input : "Uczeń-01";
+            document.getElementById('player-display-name').innerText = playerName;
+            document.getElementById('cert-player-name').innerText = playerName.toUpperCase();
+            playTone(600, 'triangle', 0.15);
+        }
+
+        function showCustomMessage(msg) {
+            const toast = document.createElement('div');
+            toast.className = "fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-slate-900 border border-blue-500 text-blue-400 px-6 py-3 rounded-full font-orbitron font-bold text-sm shadow-[0_0_20px_rgba(59,130,246,0.6)]";
+            toast.innerText = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function toggleJoke(id) {
+            document.getElementById(`joke-ans-${id}`).classList.toggle('hidden');
+            playTone(800, 'sine', 0.05);
+        }
+
+
+        // ==========================================
+        // MISJA 1: STEROWANIE LABIRYNTEEM
+        // ==========================================
+        const mazeSize = 7;
+        let playerPos = { x: 0, y: 0 };
+        let activeGate = null;
+        let collectedKeys = 0;
+        
+        const mazeGrid = [
+            [0, 0, 1, 0, 0, 0, 0],
+            [1, 0, 1, 0, 1, 1, 0],
+            [0, 0, 2, 0, 0, 1, 0],
+            [0, 1, 1, 1, 0, 1, 1],
+            [0, 0, 0, 2, 0, 0, 0],
+            [1, 1, 0, 1, 1, 1, 2],
+            [0, 0, 0, 0, 0, 0, 3]
+        ];
+
+        const gateQuestions = [
+            { q: "Oblicz wynik sumy: 1/4 + 2/4", opts: ["3/4", "3/8", "1/2", "5/4"], ans: "3/4" },
+            { q: "Oblicz wynik sumy: 1/2 + 1/3", opts: ["2/5", "5/6", "1/5", "3/6"], ans: "5/6" },
+            { q: "Oblicz wynik różnicy: 1 cała i 3/5 - 4/5", opts: ["1/5", "4/5", "2/5", "1 cała i 1/5"], ans: "4/5" }
+        ];
+        let currentGateIndex = 0;
+
+        function buildMaze() {
+            const container = document.getElementById('maze-container');
+            container.innerHTML = '';
+            for (let r = 0; r < mazeSize; r++) {
+                for (let c = 0; c < mazeSize; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = "maze-cell rounded flex items-center justify-center font-bold text-base ";
+                    
+                    if (mazeGrid[r][c] === 1) {
+                        cell.className += "bg-slate-800 border border-slate-700 text-slate-600";
+                        cell.innerHTML = '<i class="fa-solid fa-border-all"></i>';
+                    } else if (mazeGrid[r][c] === 2) {
+                        cell.className += "bg-amber-950/80 border border-amber-500 text-amber-400";
+                        cell.innerHTML = '<i class="fa-solid fa-lock"></i>';
+                    } else if (mazeGrid[r][c] === 3) {
+                        cell.className += "bg-cyan-950/80 border border-cyan-400 text-cyan-400 font-orbitron portal-animation";
+                        cell.innerHTML = '★';
+                    } else {
+                        cell.className += "bg-slate-900/80 border border-slate-800 text-slate-700";
+                    }
+
+                    if (playerPos.x === c && playerPos.y === r) {
+                        cell.className += " !bg-blue-600 !text-white !border-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.8)]";
+                        cell.innerHTML = '▲';
+                    }
+                    container.appendChild(cell);
+                }
+            }
+            document.getElementById('maze-keys').innerText = `${collectedKeys} / 3`;
+        }
+
+        function movePlayer(dir) {
+            if (isMazeComplete) return;
+            let targetX = playerPos.x;
+            let targetY = playerPos.y;
+
+            if (dir === 'up') targetY--;
+            if (dir === 'down') targetY++;
+            if (dir === 'left') targetX--;
+            if (dir === 'right') targetX++;
+
+            if (targetX >= 0 && targetX < mazeSize && targetY >= 0 && targetY < mazeSize) {
+                const destinationType = mazeGrid[targetY][targetX];
+
+                if (destinationType === 1) {
+                    playTone(150, 'sawtooth', 0.1);
+                    return;
+                }
+                if (destinationType === 2) {
+                    triggerGate(targetX, targetY);
+                    return;
+                }
+                if (destinationType === 3) {
+                    if (collectedKeys >= 3) {
+                        playerPos = { x: targetX, y: targetY };
+                        buildMaze();
+                        completeMazeMission();
+                    } else {
+                        showCustomMessage("Wyjście wymaga rozwiązania 3 ułamkowych bram!");
+                        playTone(200, 'square', 0.2);
+                    }
+                    return;
+                }
+
+                playerPos = { x: targetX, y: targetY };
+                playTone(300, 'sine', 0.05);
+                buildMaze();
+            }
+        }
+
+        function triggerGate(gx, gy) {
+            activeGate = { x: gx, y: gy };
+            const qData = gateQuestions[currentGateIndex];
+            
+            document.getElementById('maze-overlay-title').innerText = "Wrota Zablokowane!";
+            document.getElementById('maze-overlay-desc').innerText = "Wskaż prawidłowy wynik, aby usunąć blokadę:";
+            document.getElementById('maze-question').innerText = qData.q;
+            
+            const optsContainer = document.getElementById('maze-options');
+            optsContainer.innerHTML = '';
+            
+            qData.opts.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "bg-blue-950 hover:bg-blue-900 border border-blue-800 text-slate-100 py-3 px-2 rounded-lg font-bold text-sm transition-all";
+                btn.innerText = opt;
+                btn.onclick = () => checkGateAnswer(opt, qData.ans);
+                optsContainer.appendChild(btn);
+            });
+
+            document.getElementById('maze-feedback').className = "text-sm font-semibold text-cyan-400 hidden";
+            document.getElementById('maze-overlay').classList.remove('hidden');
+            playTone(500, 'triangle', 0.3);
+        }
+
+        function checkGateAnswer(selected, correct) {
+            const feedback = document.getElementById('maze-feedback');
+            feedback.classList.remove('hidden');
+
+            if (selected === correct) {
+                feedback.className = "text-sm font-semibold text-cyan-400 block mt-2";
+                feedback.innerHTML = "Doskonale! System zaliczył poprawną odpowiedź.";
+                playTone(600, 'sine', 0.1);
+
+                mazeGrid[activeGate.y][activeGate.x] = 0; 
+                collectedKeys++;
+                currentGateIndex++;
+                playerPos = { x: activeGate.x, y: activeGate.y }; 
+                
+                document.getElementById('maze-overlay').classList.add('hidden');
+                buildMaze();
+                
+                if (collectedKeys === 3) {
+                    showCustomMessage("Wszystkie blokady zneutralizowane! Ruszaj do portalu (★)");
+                }
+            } else {
+                feedback.className = "text-sm font-semibold text-red-500 block mt-2";
+                feedback.innerHTML = "Błędne obliczenie. Policz jeszcze raz na spokojnie!";
+                playTone(180, 'sawtooth', 0.4);
+            }
+        }
+
+        function completeMazeMission() {
+            isMazeComplete = true;
+            globalScore += 150;
+            updateProgress();
+            
+            playTone(400, 'sine', 0.2);
+            document.getElementById('maze-overlay-title').innerText = "MISJA ZALICZONA!";
+            document.getElementById('maze-overlay-desc').innerText = "Powtórka ułamków zwykłych ukończona sukcesem.";
+            document.getElementById('maze-question').innerText = "Uzyskano +150 XP. Etap 2 stoi przed Tobą otworem!";
+            document.getElementById('maze-options').innerHTML = '';
+            document.getElementById('maze-feedback').className = "text-sm font-semibold text-amber-400 block mt-2";
+            document.getElementById('maze-feedback').innerText = "Możesz przejść do Laboratorium Ułamków Dziesiętnych w panelu po lewej stronie.";
+            document.getElementById('maze-overlay').classList.remove('hidden');
+        }
+
+        function resetMaze() {
+            playerPos = { x: 0, y: 0 };
+            collectedKeys = 0;
+            currentGateIndex = 0;
+            isMazeComplete = false;
+            mazeGrid[2][2] = 2; mazeGrid[4][3] = 2; mazeGrid[5][6] = 2;
+            document.getElementById('maze-overlay').classList.add('hidden');
+            buildMaze();
+        }
+
+        function devCompleteMaze() {
+            collectedKeys = 3; playerPos = { x: 6, y: 6 };
+            buildMaze(); completeMazeMission();
+        }
+
+
+        // ==========================================
+        // MISJA 2: LABORATORIUM UŁAMKÓW DZIESIĘTNYCH (4 DZIAŁANIA + SORTOWANIE)
+        // ==========================================
+        let currentTab = 'add';
+        
+        // Stacja A (Dodawanie)
+        const decimalAddData = [
+            { eq: "0,7 + 0,5", opts: ["1,2", "0,12", "1,12", "0,2"], ans: "1,2" },
+            { eq: "1,25 + 0,3", opts: ["1,28", "1,55", "1,5", "4,25"], ans: "1,55" },
+            { eq: "3,7 + 2,45", opts: ["6,15", "5,15", "5,75", "6,2"], ans: "6,15" }
+        ];
+        let currentAddIndex = 0;
+
+        // Stacja B (Odejmowanie)
+        const decimalSubData = [
+            { eq: "1,5 - 0,7", opts: ["0,8", "1,2", "0,08", "0,7"], ans: "0,8" },
+            { eq: "3,2 - 1,15", opts: ["2,05", "2,15", "1,05", "2,5"], ans: "2,05" },
+            { eq: "5 - 2,3", opts: ["3,7", "2,7", "3,3", "2,3"], ans: "2,7" }
+        ];
+        let currentSubIndex = 0;
+
+        // Stacja C (Mnożenie)
+        const decimalMulData = [
+            { eq: "0,2 · 0,4", opts: ["0,8", "0,08", "0,008", "8,0"], ans: "0,08" },
+            { eq: "0,5 · 0,6", opts: ["3,0", "0,3", "0,03", "0,11"], ans: "0,3" },
+            { eq: "1,2 · 0,3", opts: ["0,36", "3,6", "0,036", "1,5"], ans: "0,36" }
+        ];
+        let currentMulIndex = 0;
+
+        // Stacja D (Dzielenie)
+        const decimalDivData = [
+            { eq: "2,4 : 6", opts: ["0,4", "4,0", "0,04", "0,6"], ans: "0,4" },
+            { eq: "1,5 : 3", opts: ["0,5", "5,0", "0,05", "0,3"], ans: "0,5" },
+            { eq: "0,48 : 4", opts: ["0,12", "1,2", "0,012", "0,24"], ans: "0,12" }
+        ];
+        let currentDivIndex = 0;
+
+        // Stacja E (Sortowanie)
+        const targetDecimals = [0.08, 0.15, 0.2, 0.301, 1.05];
+        let userSelectedDecimals = [];
+        let shuffledDecimals = [0.2, 0.08, 1.05, 0.15, 0.301];
+
+        function switchDecimalTab(tab) {
+            currentTab = tab;
+            
+            // Podświetlenie odpowiedniego przycisku taba
+            const tabs = ['add', 'sub', 'mul', 'div', 'sort'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                if (t === tab) {
+                    btn.className = "px-4 py-2 text-cyan-400 border-b-2 border-cyan-400 font-bold transition-all";
+                } else {
+                    btn.className = "px-4 py-2 text-slate-400 hover:text-white transition-all";
+                }
+                
+                // Ukrywanie/Pokazywanie właściwej sekcji
+                document.getElementById(`decimal-section-${t}`).classList.add('hidden');
+            });
+
+            document.getElementById(`decimal-section-${tab}`).classList.remove('hidden');
+
+            if (tab === 'add') loadDecimalAdd();
+            if (tab === 'sub') loadDecimalSub();
+            if (tab === 'mul') loadDecimalMul();
+            if (tab === 'div') loadDecimalDiv();
+            if (tab === 'sort') setupDecimalsGame();
+            
+            playTone(350, 'sine', 0.08);
+        }
+
+        // STACJA A - DODAWANIE
+        function loadDecimalAdd() {
+            if (currentAddIndex >= decimalAddData.length) {
+                document.getElementById('decimal-add-eq').innerText = "Stacja Ukończona! ✓";
+                document.getElementById('decimal-add-options').innerHTML = "";
+                document.getElementById('status-chk-add').className = "text-cyan-400";
+                document.getElementById('status-chk-add').innerText = "Zaliczono";
+                decimalAddDone = true;
+                checkOverallDecimals();
+                return;
+            }
+            const item = decimalAddData[currentAddIndex];
+            document.getElementById('decimal-add-eq').innerText = `${item.eq} = ?`;
+            document.getElementById('decimal-add-progress').innerText = `Przykład: ${currentAddIndex + 1} z ${decimalAddData.length}`;
+            
+            const container = document.getElementById('decimal-add-options');
+            container.innerHTML = '';
+            item.opts.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "bg-slate-900 hover:bg-slate-800 border border-slate-800 text-white font-bold py-3 rounded-lg text-sm transition-all";
+                btn.innerText = opt;
+                btn.onclick = () => answerAdd(opt, item.ans);
+                container.appendChild(btn);
+            });
+        }
+
+        function answerAdd(selected, correct) {
+            if (selected === correct) {
+                playTone(600, 'sine', 0.1);
+                currentAddIndex++;
+                loadDecimalAdd();
+            } else {
+                playTone(180, 'sawtooth', 0.3);
+                showCustomMessage("Błąd! Przemyśl dodawanie ułamków jeszcze raz.");
+            }
+        }
+
+        // STACJA B - ODEJMOWANIE
+        function loadDecimalSub() {
+            if (currentSubIndex >= decimalSubData.length) {
+                document.getElementById('decimal-sub-eq').innerText = "Stacja Ukończona! ✓";
+                document.getElementById('decimal-sub-options').innerHTML = "";
+                document.getElementById('status-chk-sub').className = "text-cyan-400";
+                document.getElementById('status-chk-sub').innerText = "Zaliczono";
+                decimalSubDone = true;
+                checkOverallDecimals();
+                return;
+            }
+            const item = decimalSubData[currentSubIndex];
+            document.getElementById('decimal-sub-eq').innerText = `${item.eq} = ?`;
+            document.getElementById('decimal-sub-progress').innerText = `Przykład: ${currentSubIndex + 1} z ${decimalSubData.length}`;
+            
+            const container = document.getElementById('decimal-sub-options');
+            container.innerHTML = '';
+            item.opts.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "bg-slate-900 hover:bg-slate-800 border border-slate-800 text-white font-bold py-3 rounded-lg text-sm transition-all";
+                btn.innerText = opt;
+                btn.onclick = () => answerSub(opt, item.ans);
+                container.appendChild(btn);
+            });
+        }
+
+        function answerSub(selected, correct) {
+            if (selected === correct) {
+                playTone(600, 'sine', 0.1);
+                currentSubIndex++;
+                loadDecimalSub();
+            } else {
+                playTone(180, 'sawtooth', 0.3);
+                showCustomMessage("Błąd! Przemyśl odejmowanie ułamków jeszcze raz.");
+            }
+        }
+
+        // STACJA C - MNOŻENIE
+        function loadDecimalMul() {
+            if (currentMulIndex >= decimalMulData.length) {
+                document.getElementById('decimal-mul-eq').innerText = "Stacja Ukończona! ✓";
+                document.getElementById('decimal-mul-options').innerHTML = "";
+                document.getElementById('status-chk-mul').className = "text-cyan-400";
+                document.getElementById('status-chk-mul').innerText = "Zaliczono";
+                decimalMulDone = true;
+                checkOverallDecimals();
+                return;
+            }
+            const item = decimalMulData[currentMulIndex];
+            document.getElementById('decimal-mul-eq').innerText = `${item.eq} = ?`;
+            document.getElementById('decimal-mul-progress').innerText = `Przykład: ${currentMulIndex + 1} z ${decimalMulData.length}`;
+            
+            const container = document.getElementById('decimal-mul-options');
+            container.innerHTML = '';
+            item.opts.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "bg-slate-900 hover:bg-slate-800 border border-slate-800 text-white font-bold py-3 rounded-lg text-sm transition-all";
+                btn.innerText = opt;
+                btn.onclick = () => answerMul(opt, item.ans);
+                container.appendChild(btn);
+            });
+        }
+
+        function answerMul(selected, correct) {
+            if (selected === correct) {
+                playTone(600, 'sine', 0.1);
+                currentMulIndex++;
+                loadDecimalMul();
+            } else {
+                playTone(180, 'sawtooth', 0.3);
+                showCustomMessage("Błąd! Uważaj na liczbę cyfr po przecinku w mnożeniu.");
+            }
+        }
+
+        // STACJA D - DZIELENIE
+        function loadDecimalDiv() {
+            if (currentDivIndex >= decimalDivData.length) {
+                document.getElementById('decimal-div-eq').innerText = "Stacja Ukończona! ✓";
+                document.getElementById('decimal-div-options').innerHTML = "";
+                document.getElementById('status-chk-div').className = "text-cyan-400";
+                document.getElementById('status-chk-div').innerText = "Zaliczono";
+                decimalDivDone = true;
+                checkOverallDecimals();
+                return;
+            }
+            const item = decimalDivData[currentDivIndex];
+            document.getElementById('decimal-div-eq').innerText = `${item.eq} = ?`;
+            document.getElementById('decimal-div-progress').innerText = `Przykład: ${currentDivIndex + 1} z ${decimalDivData.length}`;
+            
+            const container = document.getElementById('decimal-div-options');
+            container.innerHTML = '';
+            item.opts.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "bg-slate-900 hover:bg-slate-800 border border-slate-800 text-white font-bold py-3 rounded-lg text-sm transition-all";
+                btn.innerText = opt;
+                btn.onclick = () => answerDiv(opt, item.ans);
+                container.appendChild(btn);
+            });
+        }
+
+        function answerDiv(selected, correct) {
+            if (selected === correct) {
+                playTone(600, 'sine', 0.1);
+                currentDivIndex++;
+                loadDecimalDiv();
+            } else {
+                playTone(180, 'sawtooth', 0.3);
+                showCustomMessage("Błąd! Zweryfikuj dzielenie ułamka dziesiętnego.");
+            }
+        }
+
+        // STACJA E - SORTOWANIE (USZEREGOWANIE)
+        function setupDecimalsGame() {
+            const container = document.getElementById('decimal-buttons-container');
+            container.innerHTML = '';
+            shuffledDecimals.forEach((num) => {
+                const btn = document.createElement('button');
+                btn.id = `dec-btn-${num}`;
+                btn.className = "bg-slate-950 hover:bg-slate-900 border border-blue-900 text-white font-orbitron font-bold py-4 rounded-xl text-center text-lg transition-all";
+                btn.innerText = num.toString().replace('.', ',');
+                btn.onclick = () => selectDecimal(num);
+                container.appendChild(btn);
+            });
+        }
+
+        function selectDecimal(num) {
+            if (decimalSortDone) return;
+            if (userSelectedDecimals.includes(num)) return;
+
+            userSelectedDecimals.push(num);
+            playTone(450, 'triangle', 0.08);
+
+            const btn = document.getElementById(`dec-btn-${num}`);
+            btn.className = "bg-slate-900 border border-slate-800 text-slate-600 font-orbitron font-bold py-4 rounded-xl text-center text-lg pointer-events-none opacity-40";
+
+            renderDecimalSequence();
+            checkDecimalSequence();
+        }
+
+        function renderDecimalSequence() {
+            const display = document.getElementById('decimal-sequence-display');
+            display.innerHTML = '';
+            userSelectedDecimals.forEach((num, index) => {
+                const node = document.createElement('span');
+                node.className = "bg-blue-950 border border-blue-700 text-blue-300 font-orbitron font-bold px-3 py-1.5 rounded-lg text-sm";
+                node.innerText = num.toString().replace('.', ',');
+                display.appendChild(node);
+            });
+        }
+
+        function checkDecimalSequence() {
+            if (userSelectedDecimals.length === targetDecimals.length) {
+                let isCorrect = true;
+                for (let i = 0; i < targetDecimals.length; i++) {
+                    if (userSelectedDecimals[i] !== targetDecimals[i]) {
+                        isCorrect = false;
+                        break;
+                    }
+                }
+
+                if (isCorrect) {
+                    decimalSortDone = true;
+                    document.getElementById('status-chk-sort').className = "text-cyan-400";
+                    document.getElementById('status-chk-sort').innerText = "Zaliczono";
+                    checkOverallDecimals();
+                    playTone(600, 'sine', 0.1);
+                } else {
+                    playTone(200, 'sawtooth', 0.4);
+                    showCustomMessage("Niepoprawna kolejność. Liczby wracają na miejsce startowe!");
+                    setTimeout(resetDecimals, 1200);
+                }
+            }
+        }
+
+        function resetDecimals() {
+            userSelectedDecimals = [];
+            const display = document.getElementById('decimal-sequence-display');
+            display.innerHTML = `<span class="text-slate-500 italic text-sm">Wybierz odpowiednie liczby z powyższej siatki...</span>`;
+            setupDecimalsGame();
+        }
+
+        // SPRAWDZENIE OGÓLNEGO STANU LABORATORIUM
+        function checkOverallDecimals() {
+            if (decimalAddDone && decimalSubDone && decimalMulDone && decimalDivDone && decimalSortDone && !isDecimalsComplete) {
+                isDecimalsComplete = true;
+                globalScore += 150;
+                updateProgress();
+                document.getElementById('decimal-overall-success').classList.remove('hidden');
+                showCustomMessage("Laboratorium zaliczone na 100%!");
+            }
+        }
+
+        function devCompleteDecimals() {
+            decimalAddDone = true;
+            decimalSubDone = true;
+            decimalMulDone = true;
+            decimalDivDone = true;
+            decimalSortDone = true;
+            
+            const list = ['add', 'sub', 'mul', 'div', 'sort'];
+            list.forEach(item => {
+                const badge = document.getElementById(`status-chk-${item}`);
+                badge.className = "text-cyan-400";
+                badge.innerText = "Zaliczono";
+            });
+            
+            checkOverallDecimals();
+        }
+
+
+        // ==========================================
+        // MISJA 3: WIELKI QUIZ KLASOWY
+        // ==========================================
+        const quizQuestions = [
+            { category: "Ułamki dziesiętne", q: "Jaki jest wynik mnożenia: 0,4 · 0,2 ?", opts: ["0,8", "0,08", "8,0", "0,008"], ans: "0,08", exp: "Pomnóż cyfry (4 · 2 = 8). Następnie odlicz łącznie dwa miejsca po przecinku, co daje wynik 0,08." },
+            { category: "Geometria", q: "Wskaż poprawny wzór na obliczenie pola powierzchni równoległoboku (podstawa a, wysokość h):", opts: ["P = a · b", "P = a · h", "P = (a · h) / 2", "P = a + h"], ans: "P = a · h", exp: "Pole równoległoboku to iloczyn jego podstawy i wysokości opuszczonej prostopadle na tę podstawę." },
+            { category: "Działania na ułamkach", q: "Oblicz wynik sumy: 1,8 + 2,45", opts: ["4,25", "3,25", "4,3", "3,8"], ans: "4,25", exp: "Wyrównaj miejsca po przecinku: 1,80 + 2,45 = 4,25." },
+            { category: "Pola powierzchni", q: "Kwadrat ma bok o długości 6 cm. Oblicz jego pole powierzchni:", opts: ["24 cm²", "36 cm²", "12 cm²", "18 cm²"], ans: "36 cm²", exp: "Wzór na pole kwadratu to bok pomnożony przez bok (6 · 6 = 36)." },
+            { category: "Dzielenie ułamków", q: "Jaki jest wynik dzielenia: 3,2 : 8 ?", opts: ["0,4", "4", "0,04", "0,16"], ans: "0,4", exp: "Zauważ, że 32 : 8 = 4. Ponieważ dzielimy ułamek z jednym miejscem po przecinku, wynik to 0,4." }
+        ];
+        let currentQuizIndex = 0;
+        let quizStreak = 0;
+        let selectedQuizAns = null;
+
+        function loadQuizQuestion() {
+            const data = quizQuestions[currentQuizIndex];
+            document.getElementById('quiz-question-counter').innerText = `Pytanie: ${currentQuizIndex + 1} z ${quizQuestions.length}`;
+            document.getElementById('quiz-streak-display').innerText = `Seria poprawnych odpowiedzi: ${quizStreak} 🔥`;
+            document.getElementById('quiz-category').innerText = data.category;
+            document.getElementById('quiz-question-text').innerText = data.q;
+            
+            const container = document.getElementById('quiz-options-container');
+            container.innerHTML = '';
+            data.opts.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.id = `quiz-opt-${opt}`;
+                btn.className = "bg-slate-950 hover:bg-slate-900 border border-blue-900/50 text-slate-200 py-3.5 px-4 rounded-xl font-bold text-sm text-left transition-all";
+                btn.innerText = opt;
+                btn.onclick = () => selectQuizAnswer(opt);
+                container.appendChild(btn);
+            });
+            document.getElementById('quiz-explanation-box').classList.add('hidden');
+            document.getElementById('quiz-next-btn').disabled = true;
+            selectedQuizAns = null;
+        }
+
+        function selectQuizAnswer(opt) {
+            if (selectedQuizAns !== null) return;
+            selectedQuizAns = opt;
+            const data = quizQuestions[currentQuizIndex];
+            const isCorrect = (opt === data.ans);
+
+            data.opts.forEach(o => {
+                const btn = document.getElementById(`quiz-opt-${o}`);
+                if (o === data.ans) {
+                    btn.className = "bg-cyan-950 border-2 border-cyan-400 text-cyan-300 py-3.5 px-4 rounded-xl font-bold text-sm text-left pointer-events-none";
+                } else if (o === opt && !isCorrect) {
+                    btn.className = "bg-red-950 border-2 border-red-500 text-red-300 py-3.5 px-4 rounded-xl font-bold text-sm text-left pointer-events-none";
+                } else {
+                    btn.className = "bg-slate-950/40 border border-slate-900 text-slate-600 py-3.5 px-4 rounded-xl font-bold text-sm text-left pointer-events-none";
+                }
+            });
+
+            if (isCorrect) {
+                quizStreak++; globalScore += 40;
+                playTone(600, 'sine', 0.1);
+            } else {
+                quizStreak = 0;
+                playTone(180, 'sawtooth', 0.3);
+            }
+
+            // Wyświetlenie objaśnienia
+            const expBox = document.getElementById('quiz-explanation-box');
+            const expText = document.getElementById('quiz-explanation-text');
+            expText.innerHTML = `<strong class="${isCorrect ? 'text-cyan-400' : 'text-red-400'}">${isCorrect ? 'ODPOWIEDŹ PRAWIDŁOWA ✓' : 'BŁĘDNA ODPOWIEDŹ ✗'}</strong><br>${data.exp}`;
+            expBox.classList.remove('hidden');
+
+            document.getElementById('quiz-next-btn').disabled = false;
+            updateProgress();
+        }
+
+        function nextQuizQuestion() {
+            currentQuizIndex++;
+            if (currentQuizIndex < quizQuestions.length) loadQuizQuestion();
+            else completeQuizMission();
+        }
+
+        function skipQuizQuestion() {
+            nextQuizQuestion();
+        }
+
+        function completeQuizMission() {
+            isQuizComplete = true;
+            updateProgress();
+            const box = document.getElementById('quiz-options-container');
+            box.innerHTML = `<div class="col-span-full text-center py-6"><p class="text-cyan-400 font-orbitron font-bold text-xl mb-2">QUIZ UKOŃCZONY POMYŚLNIE!</p></div>`;
+            document.getElementById('quiz-next-btn').style.display = "none";
+        }
+
+        function devCompleteQuiz() {
+            currentQuizIndex = quizQuestions.length;
+            completeQuizMission();
+        }
+
+
+        // ==========================================
+        // MISJA 4: POJEDYNEK Z BOSSEM (POLA FIGUR WIZUALNIE)
+        // ==========================================
+        let bossHp = 100;
+        let currentBossStep = 0;
+
+        // Czytelne rysunki figur w formacie wektorowym SVG
+        const geometrySVGs = [
+            // Prostokąt
+            `<svg class="w-full h-full" viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+                <rect x="40" y="25" width="120" height="60" fill="none" stroke="#3b82f6" stroke-width="3" />
+                <text x="100" y="20" fill="#f8fafc" font-family="Rajdhani" font-weight="bold" font-size="11" text-anchor="middle">bok a = 8 cm</text>
+                <text x="25" y="60" fill="#f8fafc" font-family="Rajdhani" font-weight="bold" font-size="11" text-anchor="end">bok b = 5 cm</text>
+                <text x="100" y="60" fill="#fbbf24" font-family="Orbitron" font-weight="bold" font-size="12" text-anchor="middle">PROSTOKĄT</text>
+            </svg>`,
+            // Równoległobok
+            `<svg class="w-full h-full" viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+                <polygon points="40,90 150,90 170,35 60,35" fill="none" stroke="#3b82f6" stroke-width="3" />
+                <line x1="60" y1="35" x2="60" y2="90" stroke="#f59e0b" stroke-dasharray="4" stroke-width="2" />
+                <text x="50" y="65" fill="#f59e0b" font-family="Rajdhani" font-weight="bold" font-size="10" text-anchor="middle">h = 5 cm</text>
+                <text x="95" y="105" fill="#f8fafc" font-family="Rajdhani" font-weight="bold" font-size="11" text-anchor="middle">bok a = 12 cm</text>
+                <text x="110" y="55" fill="#fbbf24" font-family="Orbitron" font-weight="bold" font-size="11" text-anchor="middle">RÓWNOLEGŁOBOK</text>
+            </svg>`,
+            // Trójkąt
+            `<svg class="w-full h-full" viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+                <polygon points="30,90 170,90 110,35" fill="none" stroke="#3b82f6" stroke-width="3" />
+                <line x1="110" y1="35" x2="110" y2="90" stroke="#f59e0b" stroke-dasharray="4" stroke-width="2" />
+                <text x="125" y="65" fill="#f59e0b" font-family="Rajdhani" font-weight="bold" font-size="10" text-anchor="middle">h = 6 cm</text>
+                <text x="100" y="105" fill="#f8fafc" font-family="Rajdhani" font-weight="bold" font-size="11" text-anchor="middle">podstawa a = 10 cm</text>
+                <text x="100" y="55" fill="#fbbf24" font-family="Orbitron" font-weight="bold" font-size="12" text-anchor="middle">TRÓJKĄT</text>
+            </svg>`
+        ];
+
+        const bossChallenges = [
+            { q: "Zadanie 1: Prostokąt ma boki o długościach 8 cm oraz 5 cm. Oblicz jego pole powierzchni.", opts: ["40 cm²", "26 cm²", "20 cm²", "80 cm²"], ans: "40 cm²", dmg: 35 },
+            { q: "Zadanie 2: Równoległobok ma podstawę długości 12 cm i wysokość równą 5 cm. Oblicz jego pole powierzchni.", opts: ["60 cm²", "34 cm²", "30 cm²", "120 cm²"], ans: "60 cm²", dmg: 35 },
+            { q: "Zadanie 3: Trójkąt ma podstawę długości 10 cm oraz wysokość równą 6 cm. Oblicz jego pole powierzchni. Wskazówka: Pole = (podstawa · wysokość) : 2", opts: ["60 cm²", "30 cm²", "16 cm²", "15 cm²"], ans: "30 cm²", dmg: 30 }
+        ];
+
+        function loadBossChallenge() {
+            if (currentBossStep >= bossChallenges.length) {
+                defeatBoss();
+                return;
+            }
+
+            const data = bossChallenges[currentBossStep];
+            document.getElementById('boss-quest-text').innerText = data.q;
+            
+            // Render rysunku technicznego SVG
+            document.getElementById('geometry-canvas-wrapper').innerHTML = geometrySVGs[currentBossStep];
+            
+            const container = document.getElementById('boss-options');
+            container.innerHTML = '';
+            data.opts.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "bg-slate-950 hover:bg-slate-900 border border-red-900/60 text-slate-100 py-3 px-4 rounded-lg font-bold text-sm text-center transition-all";
+                btn.innerText = opt;
+                btn.onclick = () => answerBoss(opt);
+                container.appendChild(btn);
+            });
+            document.getElementById('boss-feedback').innerText = '';
+        }
+
+        function answerBoss(selected) {
+            const data = bossChallenges[currentBossStep];
+            const feedback = document.getElementById('boss-feedback');
+            
+            if (selected === data.ans) {
+                bossHp -= data.dmg;
+                if (bossHp < 0) bossHp = 0;
+                
+                document.getElementById('boss-hp-text').innerText = `PUNKTY ŻYCIA: ${bossHp} / 100 HP`;
+                document.getElementById('boss-hp-bar').style.width = `${bossHp}%`;
+                
+                const bossV = document.getElementById('boss-visual');
+                playTone(300, 'sawtooth', 0.15);
+
+                feedback.className = "text-xs text-center mt-3 text-cyan-400 font-bold";
+                feedback.innerText = `POPRAWNA ODPOWIEDŹ! Boss otrzymuje obrażenia!`;
+                
+                currentBossStep++;
+                setTimeout(loadBossChallenge, 1500);
+            } else {
+                playTone(180, 'sine', 0.4);
+                feedback.className = "text-xs text-center mt-3 text-red-500 font-bold";
+                feedback.innerText = "Niepoprawny wynik pola powierzchni! Sprawdź wzór.";
+                document.getElementById('boss-bubble').innerText = '"Błąd obliczeń! Spróbuj jeszcze raz!"';
+            }
+        }
+
+        function defeatBoss() {
+            isBossComplete = true;
+            globalScore += 300;
+            updateProgress();
+
+            document.getElementById('boss-quest-text').innerHTML = `
+                <span class="text-cyan-400 font-bold text-lg">POJEDYNEK WYGRANY!</span><br>
+                Wszystkie zadania geometryczne zostały rozwiązane poprawnie. Twój certyfikat jest gotowy!
+            `;
+            document.getElementById('boss-options').innerHTML = '';
+            document.getElementById('boss-hp-text').innerText = 'STATUS: ZABEZPIECZONY';
+            document.getElementById('boss-hp-bar').style.width = '0%';
+            document.getElementById('boss-bubble').innerText = '"Obliczenia pól figur okazały się bezbłędne!"';
+        }
+
+        function devDefeatBoss() {
+            bossHp = 0; currentBossStep = bossChallenges.length;
+            defeatBoss();
+        }
+
+
+        // INITIAL LOAD
+        window.onload = function() {
+            const d = new Date();
+            let day = d.getDate(), month = d.getMonth() + 1;
+            document.getElementById('cert-date').innerText = `${day < 10 ? '0' + day : day}.${month < 10 ? '0' + month : month}.${d.getFullYear()}`;
+
+            buildMaze();
+            loadQuizQuestion();
+            loadBossChallenge();
+            savePlayerName();
+        };
+
+    </script>
+</body>
+</html>
